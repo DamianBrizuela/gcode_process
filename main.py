@@ -22,8 +22,11 @@ def summary(_file_gcode, output_path= None):
         "Capas totales": analyzer.get_layer_count(),
         "Comandos M600 encontrados": analyzer.get_command_occurrences("M600")  
     }
-
-    file_path = f'{file_name}.txt'
+    path = f'settings'
+    if not os.path.exists(path):
+        os.makedirs(path)
+    
+    file_path = f'{path}/{file_name}.txt'
     with open(file_path, "w", encoding="utf-8") as file:
         summary = ''
         ident = ' '*3
@@ -33,8 +36,5 @@ def summary(_file_gcode, output_path= None):
         settings = analyzer.get_settings()
         summary += f'\nSETTINGS\n{settings}'
         file.write(summary)
-    
-    print('summary ok')
 
-print('summary exec....')
 summary(file_gcode)
