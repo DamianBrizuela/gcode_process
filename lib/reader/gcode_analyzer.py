@@ -56,7 +56,7 @@ class GcodeAnalyzer:
     def get_layer_count(self) -> Optional[int]:
         return self.metadata.get("layer_count")
     
-    def get_file_name(self) -> Optional[int]:
+    def get_config_name(self) -> Optional[int]:
         return self._get_settings().global_quality.general.name
     
     def get_command_occurrences(self, command: str) -> List[Tuple[int, str]]:
