@@ -4,8 +4,8 @@ from types import SimpleNamespace
 from argparse import Namespace
 
 file_gcode = 'code/texto_emma.gcode'
-analyzer = GcodeAnalyzer(file_gcode)
-
+#analyzer = GcodeAnalyzer(file_gcode)
+"""
 def is_primitive(value):
     return isinstance(value, (str, int, float, bool, type(None)))
 
@@ -37,14 +37,13 @@ def process(obj, indent=0, file= None):
         
     else:
         print(f"{prefix}[Unhandled type: {type(obj).__name__}]", file= file)
+"""
+#print(analyzer.process_settings())
 
-settings = analyzer.get_settings()
-print(process(settings))
+def summary(_file_gcode, output_path= None):
 
-def summary(file_gcode, output_path= None):
-
-    analyzer = GcodeAnalyzer(file_gcode)
-    if output_path:
+    analyzer = GcodeAnalyzer(_file_gcode)
+    if output_path is None:
         file_name = analyzer.get_file_name()
     else:
         file_name = output_path
@@ -58,11 +57,17 @@ def summary(file_gcode, output_path= None):
     }
 
     file_path = f'{file_name}.txt'
-    with open(file_name, "w", encoding="utf-8") as f:
-
+    with open(file_path, "w", encoding="utf-8") as file:
+        summary = ''
         ident = ' '*3
         for key, value in gcode_summary.items():
-            print(f'{key}{ident} {value}', file= file_name)
+            summary += f'{key}{ident} {value}\n'
 
-        value_settings = analyzer.get_settings()
-        #process_settings(value_settings, file=f)
+        settings = analyzer.get_settings()
+        summary += f'\nSETTINGS\n{settings}'
+        file.write(summary)
+    
+    print('summary ok')
+
+print('summary exec....')
+summary(file_gcode)

@@ -52,14 +52,17 @@ class GcodeAnalyzer:
 
     def get_filament_used(self) -> Optional[float]:
         return self.metadata.get("filament_m")
-
+    
     def get_layer_count(self) -> Optional[int]:
         return self.metadata.get("layer_count")
     
     def get_file_name(self) -> Optional[int]:
-        return self.get_settings().global_quality.general.name
+        return self._get_settings().global_quality.general.name
+    
+    def get_command_occurrences(self, command: str) -> List[Tuple[int, str]]:
+        return self.commands.get(command, [])
 
-    def get_settings(self) -> Optional[dict]:
+    def _get_settings(self) -> Optional[dict]:
         parsed_json = self.metadata.get("settings")
 
         def parse_ini_text(escaped_ini: str) -> dict:
@@ -88,8 +91,45 @@ class GcodeAnalyzer:
             
         return namespace_to_dict(obj)
 
-    def get_command_occurrences(self, command: str) -> List[Tuple[int, str]]:
-        return self.commands.get(command, [])
+    def get_settings(self):
+        settings = self._get_settings()
 
-   
+        def is_primitive(value):
+            return isinstance(value, (str, int, float, bool, type(None)))
+
+        def process(obj, indent=0, lines= None):
+            if lines is None:
+                lines = []
+
+            prefix = " " * indent
+
+            if isinstance(obj, SimpleNamespace):
+                for key, value in obj.__dict__.items():
+                    if isinstance(value, SimpleNamespace):
+                        lines.append(f"{prefix}{key.upper()}")
+                        process(value, indent + 2, lines)
+                    elif isinstance(value, list):
+                        lines.append(f"{prefix}{key.upper()}")
+                        for i, item in enumerate(value):
+                            process(item, indent + 4, lines)
+                    elif is_primitive(value):
+                        lines.append(f"{prefix}{key}: {value}")
+                    else:
+                        lines.append(f"{prefix}{key}: [complex object]")
+                        
+            elif isinstance(obj, list):
+                for i, item in enumerate(obj):
+                    lines.append(f"{prefix}- Item #{i}")
+                    process(item, indent + 2, lines)
+                    
+            elif is_primitive(obj):
+                lines.append(f"{prefix}{obj}")
+                
+            else:
+                lines.append(f"{prefix}[Unhandled type: {type(obj).__name__}]")
+
+            return lines
+        lines = process(settings)
+        return '\n'.join(lines)
+
         
