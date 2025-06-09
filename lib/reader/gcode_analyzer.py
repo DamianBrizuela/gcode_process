@@ -55,6 +55,9 @@ class GcodeAnalyzer:
 
     def get_layer_count(self) -> Optional[int]:
         return self.metadata.get("layer_count")
+    
+    def get_file_name(self) -> Optional[int]:
+        return self.get_settings().global_quality.general.name
 
     def get_settings(self) -> Optional[dict]:
         parsed_json = self.metadata.get("settings")
