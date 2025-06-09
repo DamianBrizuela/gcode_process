@@ -1,6 +1,7 @@
 from lib.reader import reader
 from lib.reader.gcode_analyzer import GcodeAnalyzer
 from types import SimpleNamespace
+from argparse import Namespace
 
 file_gcode = 'code/texto_emma.gcode'
 
@@ -20,18 +21,20 @@ for key, value in gcode_summary.items():
 print('*****************************************************************')
 
 settings = analyzer.get_settings()
-for idx, values in (settings.__dict__.items()):
-    print(f"\n[VALUE #{idx}]")
-    if isinstance(values, SimpleNamespace):
-        
-        for section, data in values.__dict__.items():
 
-            print(f"  [{section.upper()}]")
-            for key, value in data.__dict__.items():
-                print(f"    {key}: {value}")
 
-    elif isinstance(values, list):
-        for data in values:
-                print(f'{data}')
-    else:
-         print('more...')
+
+def process(obj, indent=0):
+    prefix = " " * indent
+    if isinstance(obj, SimpleNamespace):
+        for key, value in obj.__dict__.items():
+            print(f"{prefix} {key.upper()}")
+            process(value, indent + 2)
+    elif isinstance(obj, list):
+        for i, item in enumerate(obj):
+            #print(f"{prefix}- Item #{i}")
+            process(item, indent + 2)
+    else:     
+        print(f"{prefix}{obj} ({type(obj).__name__})")
+
+process(settings)
